@@ -264,6 +264,8 @@ router.post('/project/task', async (req: AuthRequest, res) => {
       body: req.body
     })
 
+    logging.info(`TaskCreate - created new task ${result.title}`)
+
     res.json({ status: 200, data: result })
   } catch (error) {
     console.log(error)
@@ -342,6 +344,8 @@ router.delete('/project/task', async (req: AuthRequest, res) => {
     await findNDelCaches(key)
     taskPusherJob.triggerUpdateEvent({
       projectId,
+      type: 'delete',
+      data: { id },
       uid: req.authen.id
     })
 
@@ -377,6 +381,7 @@ router.put('/project/task-many', async (req: AuthRequest, res) => {
     logging.info('TaskUpdateMany - successfully')
     taskPusherJob.triggerUpdateEvent({
       projectId: data.projectId,
+      type: 'update-many',
       uid: userId
     })
 
@@ -400,6 +405,7 @@ router.put('/project/task', async (req: AuthRequest, res) => {
       userId,
       body: req.body as Task
     })
+    logging.info(`TaskUpdate - update task: ${result.id}`)
 
     res.json({
       status: 200,

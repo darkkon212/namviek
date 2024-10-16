@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { createAdminUser, getOrgOwner } from './seeder/user'
-import { createOrganization } from './seeder/organization'
+import { createOrganization, updateAllSlug } from './seeder/organization'
 import { createProject } from './seeder/project'
 import { generateIconName, generateOrgName, generateProjectName } from './dummy'
+import { runTest } from './seeder/test'
+import { generateDailyData } from './seeder/report'
 const args = process.argv
 
 const prisma = new PrismaClient()
@@ -56,19 +58,29 @@ async function main() {
   console.log('>>>>>>')
   switch (type) {
     case 'user':
-      createAdminUser(value).then(res => {
-        console.log(`
+      const res = await createAdminUser(value)
+      console.log(`
 An user has been created !
 =============================================
 account: ${res.email}
 password: ${process.env.DEFAULT_PWD || '123123123'}
 =============================================
 `)
-      })
       break;
 
     case 'starter':
       createStarterData()
+      break;
+    case 'update-slug':
+      updateAllSlug().then(() => {
+        console.log('Update all organization successfully')
+      })
+      break
+    case 'daily-stats':
+      await generateDailyData()
+      break;
+    case 'test':
+      await runTest()
       break;
 
     default:

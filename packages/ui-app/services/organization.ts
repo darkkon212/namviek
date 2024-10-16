@@ -14,6 +14,7 @@ export const orgUpdateStorageConfig = (orgId: string, config: {
   region: string
   secretKey: string
   accessKey: string
+  maxStorageSize: string
 }) => {
   return httpPut('/api/org-storage', {
     orgId,
@@ -33,4 +34,12 @@ export const orgGet = () => {
 
 export const orgGetById = (orgID: string) => {
   return httpGet(`/api/org/${orgID}`)
+}
+
+export const orgGetBySlug = (slug: string) => {
+  return httpGet('/api/org/query/slug', {
+    params: {
+      slug
+    }
+  })
 }

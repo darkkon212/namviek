@@ -14,6 +14,7 @@ import { useProjectViewList } from '../ProjectView/useProjectViewList'
 import { ProjectViewType } from '@prisma/client'
 import StatusSelectMultiple from '@/components/StatusSelectMultiple'
 import useTaskFilterContext from './useTaskFilterContext'
+import { useUser } from '@goalie/nextjs'
 
 let timeout = 0
 interface ITaskFilterProps {
@@ -32,6 +33,7 @@ export default function TaskFilter({
   const [txt, setTxt] = useState('')
   const { filter, setFilterValue, updateGroupByFilter } = useTaskFilterContext()
   const { currentViewType } = useProjectViewList()
+  const { user } = useUser()
 
   const {
     dateOperator,
@@ -43,6 +45,18 @@ export default function TaskFilter({
     assigneeIds,
     statusIds
   } = filter
+
+  if (!assigneeIds) {
+    console.error(`${assigneeIds} is undefined, use ALL for default`)
+  }
+
+  const updatedAssigneeIds = assigneeIds ? assigneeIds.map(uid => {
+    if (uid === 'ME' && user?.id) {
+      return user.id
+    }
+
+    return uid
+  }) : ['ALL']
 
   const isDateRange = date === 'date-range'
   const isCalendarMode = currentViewType === ProjectViewType.CALENDAR
@@ -61,17 +75,6 @@ export default function TaskFilter({
       setFilterValue('term', val)
     }, 350) as unknown as number
   }
-
-  // useEffect(() => {
-  //   if (timeout) {
-  //     clearTimeout(timeout)
-  //   }
-  //
-  //   timeout = setTimeout(() => {
-  //     console.log('1')
-  //     setFilterValue('term', txt)
-  //   }, 250) as unknown as number
-  // }, [txt])
 
   return (
     <div className="task-filter">
@@ -187,7 +190,7 @@ export default function TaskFilter({
         {assigneeEnable ? (
           <MultiMemberPicker
             all={true}
-            value={assigneeIds}
+            value={updatedAssigneeIds}
             onChange={val => {
               setFilterValue('assigneeIds', val)
             }}

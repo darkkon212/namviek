@@ -1,10 +1,12 @@
 import { ProjectViewType } from "@prisma/client";
 import { Button } from "@shared/ui";
 import FilterForm from "./FilterForm";
+import ProjectViewForMe from "../ProjectView/ProjectViewForMe";
 
-export default function ProjectViewFilterByList({ type, desc, onAdd }: {
+export default function ProjectViewFilterByList({ type, desc, isUpdate, onAdd }: {
   type: ProjectViewType
   desc: string
+  isUpdate: boolean
   onAdd: () => void
 }) {
   if (type !== ProjectViewType.LIST) return null
@@ -16,12 +18,13 @@ export default function ProjectViewFilterByList({ type, desc, onAdd }: {
       <h2 className="text-xl mb-3">List</h2>
       <p className="text-sm text-gray-500 mb-6">{desc}</p>
 
-      <FilterForm />
+      <FilterForm type="LIST" />
+      <ProjectViewForMe />
       <div className="text-right">
         <Button
           onClick={onAdd}
           primary
-          title={'Add list'}
+          title={isUpdate ? 'Update list' : 'Add list'}
         />
       </div>
     </div></>

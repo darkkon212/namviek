@@ -1,16 +1,17 @@
 'use client'
 
 import { useDebounce } from "@/hooks/useDebounce"
+import { useGetParams } from "@/hooks/useGetParams"
 import { orgGetById } from "@/services/organization"
 import { useOrgMemberStore } from "@/store/orgMember"
 import { Organization } from "@prisma/client"
 import { getLocalCache, setLocalCache } from "@shared/libs"
-import { Loading, Popover, Tooltip } from "@shared/ui"
+import { Loading, Popover } from "@shared/ui"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useState } from "react"
 import { AiOutlineCloudDownload } from "react-icons/ai"
-import { HiArrowLeft, HiOutlineBuildingOffice, HiOutlineChevronDown, HiOutlineCog6Tooth, HiOutlineInformationCircle, HiOutlineUserPlus } from "react-icons/hi2"
+import { HiOutlineBuildingOffice, HiOutlineChevronDown, HiOutlineInformationCircle, HiOutlineUserPlus } from "react-icons/hi2"
 
 export const setOrgInfo = ({ name, cover }: { name: string, cover: string }) => {
   name && setLocalCache('ORG_NAME', name)
@@ -29,17 +30,18 @@ function OrgInfo({ id }: { id: string }) {
   const { orgMembers } = useOrgMemberStore()
   const [org, setOrg] = useState({ cover, name })
 
-  console.log('org', org)
   const len = orgMembers.length
 
   useDebounce(() => {
+    console.log('id', id)
     orgGetById(id).then(res => {
       const { data } = res.data
+      console.log('data', data)
       const { name, cover } = data as Organization
 
       setOrgInfo({
         name,
-        cover: cover || ''
+        cover: cover || '',
       })
 
       setOrg({
@@ -65,7 +67,7 @@ function OrgInfo({ id }: { id: string }) {
   </div>
 }
 
-function OrgPopMenu({ id }: { id: string }) {
+function OrgPopMenu({ orgName }: { orgName: string }) {
 
   const menus = [
     {
@@ -75,17 +77,17 @@ function OrgPopMenu({ id }: { id: string }) {
     },
     {
       icon: HiOutlineUserPlus,
-      link: `/${id}/setting/people`,
+      link: `/${orgName}/setting/people`,
       title: 'Members'
     },
     {
       icon: AiOutlineCloudDownload,
-      link: `/${id}/setting/export-import`,
+      link: `/${orgName}/setting/export-import`,
       title: 'Export'
     },
     {
       icon: HiOutlineInformationCircle,
-      link: `/${id}/setting/about`,
+      link: `/${orgName}/setting/about`,
       title: 'About'
     }
   ]
@@ -109,12 +111,11 @@ function OrgPopMenu({ id }: { id: string }) {
 }
 
 export default function OrgSection() {
-  const { orgID } = useParams()
-
+  const { orgId, orgName } = useGetParams()
   return <section className="nav-org-section border-b dark:border-gray-800 px-3 pt-[20px] pb-[21px]">
     <div className="org-section-container flex items-center justify-between">
-      <OrgInfo id={orgID} />
-      <OrgPopMenu id={orgID} />
+      {orgId && <OrgInfo id={orgId} />}
+      <OrgPopMenu orgName={orgName} />
     </div>
   </section>
 }
